@@ -194,13 +194,13 @@ export const getTags = async (request, response) => {
     const posts = await PostModel.find().limit(8).exec();
     const tags = posts.map((obj) => obj.tags).flat();
 
-    console.log(tags);
-
     response.json({
       succes: true,
-      tags: tags.filter((obj, i) => {
-        return tags.indexOf(obj) === i;
-      }),
+      tags: tags
+        .filter((obj, i) => {
+          return tags.indexOf(obj) === i;
+        })
+        .slice(0, 8),
     });
   } catch (err) {
     response.status(500).json({
