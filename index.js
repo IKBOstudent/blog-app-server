@@ -4,18 +4,10 @@ import mongoose from "mongoose";
 import multer from "multer";
 import cors from "cors";
 
-import {
-  loginValidation,
-  registerValidation,
-  blogValidation,
-} from "./validations.js";
+import { loginValidation, registerValidation, blogValidation } from "./validations.js";
 
 import { checkAuth, handleValidationErrors } from "./utils/index.js";
-import {
-  getHome,
-  UserControllers,
-  BlogControllers,
-} from "./controllers/index.js";
+import { getHome, UserControllers, BlogControllers } from "./controllers/index.js";
 
 mongoose
   .connect(String(process.env.MONGO_URI))
@@ -53,40 +45,21 @@ app.post("/upload", checkAuth, upload.single("image"), (request, response) => {
 });
 
 // AUTH
-app.post(
-  "/auth/login",
-  loginValidation,
-  handleValidationErrors,
-  UserControllers.login
-);
-app.post(
-  "/auth/register",
-  registerValidation,
-  handleValidationErrors,
-  UserControllers.register
-);
+app.post("/auth/login", loginValidation, handleValidationErrors, UserControllers.login);
+app.post("/auth/register", registerValidation, handleValidationErrors, UserControllers.register);
 app.get("/auth/me", checkAuth, UserControllers.getMe);
 
 // POSTS
-app.get("/posts/:id", BlogControllers.getOne);
-app.get("/posts", BlogControllers.getAll);
+app.get("/posts/post/:id", BlogControllers.getOne);
+app.get("/posts/latest", BlogControllers.getAll);
+app.get("/posts/popular", BlogControllers.getSortPostsPopular);
+app.get("/posts/tag/:tag_name", BlogControllers.getPostsByTag);
 app.get("/tags", BlogControllers.getTags);
 
-app.post(
-  "/posts",
-  checkAuth,
-  blogValidation,
-  handleValidationErrors,
-  BlogControllers.create
-);
+app.post("/posts", checkAuth, blogValidation, handleValidationErrors, BlogControllers.create);
 app.delete("/posts/:id", checkAuth, BlogControllers.remove);
-app.patch(
-  "/posts/:id",
-  checkAuth,
-  blogValidation,
-  handleValidationErrors,
-  BlogControllers.update
-);
+app.patch("/posts/:id", checkAuth, blogValidation, handleValidationErrors, BlogControllers.update);
+app.patch("/posts/:id/comment", checkAuth, BlogControllers.newCommentUpdate);
 
 const PORT = process.env.PORT || 4444;
 app.listen(PORT, (err) => {
