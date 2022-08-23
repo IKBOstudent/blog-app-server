@@ -212,7 +212,7 @@ export const getTags = async (request, response) => {
 
 export const getSortPostsPopular = async (request, response) => {
   try {
-    const posts = await PostModel.find().populate("author").sort({ viewsCount: -1 }).exec();
+    const posts = await PostModel.find().populate("author", "-passwordHash").sort({ viewsCount: -1 }).exec();
 
     response.json({
       succes: true,
@@ -228,7 +228,7 @@ export const getSortPostsPopular = async (request, response) => {
 
 export const getPostsByTag = async (request, response) => {
   try {
-    const posts = await PostModel.find({ tags: request.params.tag_name });
+    const posts = await PostModel.find({ tags: request.params.tag_name }).populate("author", "-passwordHash").exec();
 
     response.json({
       succes: true,
