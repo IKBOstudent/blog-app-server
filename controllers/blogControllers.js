@@ -52,7 +52,7 @@ export const create = async (request, response) => {
       title: request.body.title,
       text: request.body.text,
       imageUrl: request.body.imageUrl,
-      tags: request.body.tags,
+      tags: request.body.tags.filter((val) => val !== ""),
       author: request.userId,
     });
     const post = await doc.save();
@@ -115,7 +115,7 @@ export const update = async (request, response) => {
         title: request.body.title,
         text: request.body.text,
         imageUrl: request.body.imageUrl,
-        tags: request.body.tags,
+        tags: request.body.tags.filter((val) => val !== ""),
         author: request.userId,
       },
       (err, doc) => {
