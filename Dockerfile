@@ -1,12 +1,14 @@
-FROM node:latest
+FROM node:18-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY ["package.json", "package-lock.json*", "./"]
 
 RUN npm install
 
 COPY . .
 
-EXPOSE 8080
-CMD [ "npm", "start" ]
+ENV PORT 10000
+
+EXPOSE ${PORT}
+CMD [ "node", "index.js" ]
