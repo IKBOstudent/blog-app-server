@@ -31,7 +31,7 @@ export const getOne = async (request, response) => {
       }
     )
       .populate("author", "-passwordHash")
-      .populate("comments.user", "fullName avatarUrl")
+      .populate("comments.user", "fullName")
       .exec();
 
     response.json({

@@ -9,7 +9,6 @@ export const registerValidation = [
     body('email', 'Invalid email format').isEmail(),
     body('password', 'Too short password').isLength({ min: 5 }),
     body('fullName', 'Too short name').isLength({ min: 3 }),
-    body('avatarUrl', 'Invalid url format').optional().isURL(),
 ];
 
 export const blogValidation = [
