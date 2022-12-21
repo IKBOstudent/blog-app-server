@@ -18,12 +18,15 @@ mongoose
 
 const app = express();
 
+const uploads_path = process.env.MEDIA_PATH || 'uploads';
+console.log('media path:', uploads_path);
+
 const storage = multer.diskStorage({
     destination: (_, __, cb) => {
-        if (!fs.existsSync('uploads')) {
-            fs.mkdirSync('uploads');
+        if (!fs.existsSync(uploads_path)) {
+            fs.mkdirSync(uploads_path);
         }
-        cb(null, 'uploads');
+        cb(null, uploads_path);
     },
     filename: (_, file, cb) => {
         cb(null, file.originalname);
@@ -34,20 +37,20 @@ const upload = multer({ storage });
 
 app.use(express.json());
 app.use(cors());
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(uploads_path));
 
 // HOME
 app.get('/', getHome);
 
 // UPLOAD
 app.post('/upload', checkAuth, upload.single('image'), async (request, response) => {
-    await sharp(`uploads/${request.file.originalname}`)
+    await sharp(`${uploads_path}/${request.file.originalname}`)
         .resize({ width: 1200 })
         .toFormat('jpeg')
         .jpeg({ quality: 90 })
-        .toFile(`uploads/resized-${request.file.originalname}`);
+        .toFile(`${uploads_path}/resized-${request.file.originalname}`);
 
-    fs.unlinkSync(`uploads/${request.file.originalname}`);
+    fs.unlinkSync(`${uploads_path}/${request.file.originalname}`);
 
     response.json({
         url: `/uploads/resized-${request.file.originalname}`,
