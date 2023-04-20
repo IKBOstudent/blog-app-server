@@ -1,15 +1,14 @@
-FROM node:18-alpine
+FROM node:16-alpine
 
-WORKDIR /usr/app
+WORKDIR /app
 
-COPY ["package.json", "package-lock.json*", "./"]
+COPY package*.json /app/
 
 RUN npm install
 
 COPY . .
 
 ENV PORT 10000
-ENV MEDIA_PATH /usr/app/uploads
 
 EXPOSE ${PORT}
 CMD [ "node", "index.js" ]
