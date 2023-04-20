@@ -1,15 +1,17 @@
 import express from 'express';
 import fs from 'fs';
+import FormData from 'form-data';
+import axios from 'axios';
 import mongoose from 'mongoose';
 import multer from 'multer';
 import cors from 'cors';
 import 'dotenv/config';
-import sharp from 'sharp';
 
 import { loginValidation, registerValidation, blogValidation } from './utils/validations.js';
 
 import { checkAuth, handleValidationErrors } from './utils/index.js';
 import { getHome, UserControllers, BlogControllers } from './controllers/index.js';
+import { resizeImage } from './utils/imageManipulations.js';
 
 mongoose
     .connect(String(process.env.MONGO_URI))
@@ -18,43 +20,47 @@ mongoose
 
 const app = express();
 
-const uploads_path = process.env.MEDIA_PATH || 'uploads';
-console.log('media path:', uploads_path);
-
-const storage = multer.diskStorage({
-    destination: (_, __, cb) => {
-        if (!fs.existsSync(uploads_path)) {
-            fs.mkdirSync(uploads_path);
-        }
-        cb(null, uploads_path);
-    },
-    filename: (_, file, cb) => {
-        cb(null, file.originalname);
-    },
-});
-
-const upload = multer({ storage });
+const upload = multer();
 
 app.use(express.json());
-app.use(cors());
-app.use('/uploads', express.static(uploads_path));
+
+app.use(
+    cors({
+        origin: '*',
+    }),
+);
 
 // HOME
 app.get('/', getHome);
 
 // UPLOAD
 app.post('/upload', checkAuth, upload.single('image'), async (request, response) => {
-    await sharp(`${uploads_path}/${request.file.originalname}`)
-        .resize({ width: 1200 })
-        .toFormat('jpeg')
-        .jpeg({ quality: 90 })
-        .toFile(`${uploads_path}/resized-${request.file.originalname}`);
+    try {
+        const { buffer, mimetype, originalname } = request.file;
 
-    fs.unlinkSync(`${uploads_path}/${request.file.originalname}`);
+        const resizedImageBuffer = await resizeImage(buffer);
 
-    response.json({
-        url: `/uploads/resized-${request.file.originalname}`,
-    });
+        const formData = new FormData();
+        formData.append('image', resizedImageBuffer, { filename: originalname });
+
+        const res_upload = await axios.post(
+            `https://api.imgbb.com/1/upload?key=${process.env.IMAGE_API_KEY}`,
+            formData,
+            {
+                headers: {
+                    'Content-Type': `multipart/form-data; boundary=${formData.getBoundary()}`,
+                },
+            },
+        );
+
+        response.json(res_upload.data.data);
+    } catch (e) {
+        console.warn(e);
+        response.status(500).json({
+            message: 'Upload failed',
+            error: e,
+        });
+    }
 });
 
 // AUTH
