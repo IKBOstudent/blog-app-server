@@ -1,0 +1,10 @@
+version: "3.4"
+
+services:
+  server:
+    image: blog-server
+    container_name: blog-server
+    restart: unless-stopped
+    env_file: .env
+    ports:
+     - "10000:10000"
