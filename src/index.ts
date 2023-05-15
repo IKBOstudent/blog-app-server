@@ -1,6 +1,7 @@
 import express from 'express';
 import mongoose from 'mongoose';
 import multer from 'multer';
+import cors from 'cors';
 
 import 'dotenv/config';
 
@@ -20,6 +21,8 @@ const upload = multer();
 
 app.use(express.json());
 app.use(loggerMiddleware);
+
+app.use(cors());
 
 // HOME
 app.get('/', getHome);
