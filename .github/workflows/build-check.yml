@@ -1,0 +1,27 @@
+name: Node build check
+
+on:
+    push:
+        branches:
+            - master
+            - develop
+    pull_request:
+        branches:
+            - master
+            - develop
+jobs:
+    build:
+        name: Run checks
+        runs-on: ubuntu-latest
+        steps:
+            - name: Use Node.js
+              uses: actions/setup-node@v3
+              with:
+                  node-version: '18.x'
+                  cache: 'npm'
+
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - run: npm ci
+            - run: npm run build

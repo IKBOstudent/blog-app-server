@@ -4,3 +4,4 @@ Dockerfile
 .env
 .git
 .gitignore
+logs.log
